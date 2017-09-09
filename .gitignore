@@ -1,0 +1,13 @@
+*.o
+*tinypython_lexer.cpp
+*tinypython_parser.cpp
+*tokens.h
+*tinypython
+*tinypython_parser.output
+
+
+*screen.elf
+*.o
+*.mif
+*.bin mem_files
+*screen.elf.s
