@@ -31,3 +31,6 @@ clean:
 	rm -f tokens.h
 	rm -f ${TARGET}
 	rm -f ${TARGET}_parser.output
+
+install:
+	./install.sh
