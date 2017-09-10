@@ -342,14 +342,14 @@ void PrintStatement::genCode(string &code)
 
         codeData cd;
         expr->genCode(cd);
-        code += "\n"+cd.code;
+        code += cd.code+"\n";
         releaseTemp(cd.place);
-        code += "\n\tmove $a0, " + cd.place;
+        code += "\tmove $a0, " + cd.place+"\n";
         
         if (expr->isA(STRING_EXPR))
-            code += "\n\tjal puts";
+            code += "\tjal puts\n";
         else
-            code += "\n\tjal put_udecimal";
+            code += "\tjal put_udecimal\n";
         it++;
     }
     code += "\n\n\tli $a0, '\\n' \n\tjal put_char";
@@ -429,6 +429,30 @@ void IfStatement::genCode(string &code)
     code += fl + "\n" + lendif + ": \n";
 }
 
-genS(While);
-genS(For);
+// genS(While);
+void WhileStatement::genCode(string &code)
+{
+    codeData cd;
+    cond->genCode(cd);
+
+    string block_code;
+    block->genCode(block_code);
+
+    string lwhile = nextInternalLaber("while");
+    string lendwhile = nextInternalLaber("end_while");
+
+    code = "# WhileStatement\n";
+    code += lwhile + ": \n" + cd.code + "\n";
+    code += "\tbeqz " + cd.place + ", " + lendwhile + "\n";
+    releaseTemp(cd.place);
+    code += block_code + "\n\tj " + lwhile + "\n";
+    code += lendwhile + ": \n";
+}
+
+// genS(For);
+void ForStatement::genCode(string &code)
+{
+
+}
+
 genS(Pass);
