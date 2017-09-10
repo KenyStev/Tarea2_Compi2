@@ -2,6 +2,7 @@
 .global divide
 .global rand_seed
 .global rand
+.global exponent
 
 .data
 rnd_state: .word 0, 0, 0, 0
@@ -71,4 +72,70 @@ rand:
 	li $t0, 0x000fffff
 	and $v0, $t1, $t0
 	# move $v0, $t1
+	jr $ra
+
+exponent:
+	addi $sp, $sp, -24
+	sw $s0, 0($sp)
+	sw $s1, 4($sp)
+	sw $s2, 8($sp)
+	sw $s3, 12($sp)
+
+	move $s0, $a0	#p
+	move $s1, $a1	#q
+	move $s2, $ra 	#ra
+	li $s3, 1		#r
+
+.while_exp:
+	sne $t0, $s1, $zero
+	beqz $t0, .while_end_expr
+
+.if_exp:
+	move $a0, $s1
+	li $a1, 2
+	addi $a2, $sp, 16
+	addi $a3, $sp, 20
+	jal divide
+	lw $t0, 0($a3)
+
+	beqz $t0, .if_exp_end
+	move $a0, $s3
+	move $a1, $s0
+	addi $a2, $sp, 16
+	addi $a3, $sp, 20
+
+	jal mult
+	lw $s3, ($a2)
+	addi $s1, $s1, -1
+
+.if_exp_end:
+	move $a0, $s0
+	move $a1, $s0
+	addi $a2, $sp, 16
+	addi $a3, $sp, 20
+
+	jal mult
+	lw $s0, 0($a2)
+
+	move $a0, $s1
+	li $a1, 2
+	addi $a2, $sp, 16
+	addi $a3, $sp, 20
+	jal divide
+
+	lw $s1, 0($a2)
+	j .while_exp
+
+.while_end_expr:
+	move $a0, $s0
+	move $a1, $s1
+	move $ra, $s2
+	move $v0, $s3
+
+	lw $s0, 0($sp)
+	lw $s1, 4($sp)
+	lw $s2, 8($sp)
+	lw $s3, 12($sp)
+	
+	addi $sp, $sp, 24
 	jr $ra

@@ -11,6 +11,12 @@ extern map<string, int> vars;
 
 int expt(int p, unsigned int q);
 
+typedef struct codeData
+{
+    string code;
+    string place;
+} codeData_t ;
+
 enum BuiltInFunct {
     FN_TIMECLOCK,
     FN_RANDSEED,
@@ -42,6 +48,7 @@ typedef list<Expr*> ExprList;
 
 class Expr {
 public:
+    virtual void genCode(codeData &) = 0;
     virtual int evaluate() = 0;
     virtual int getKind() = 0;
     bool isA(int kind) { return (getKind() == kind); }
@@ -64,6 +71,7 @@ public:
 
     int evaluate() { return expr1->evaluate() < expr2->evaluate(); }
     int getKind() { return LT_EXPR; }
+    void genCode(codeData &);
 };
 
 class GTExpr: public BinaryExpr {
@@ -72,6 +80,7 @@ public:
 
     int evaluate() { return expr1->evaluate() > expr2->evaluate(); }
     int getKind() { return GT_EXPR; }
+    void genCode(codeData &);
 };
 
 class LTEExpr: public BinaryExpr {
@@ -80,6 +89,7 @@ public:
 
     int evaluate() { return expr1->evaluate() <= expr2->evaluate(); }
     int getKind() { return LTE_EXPR; }
+    void genCode(codeData &);
 };
 
 class GTEExpr: public BinaryExpr {
@@ -88,6 +98,7 @@ public:
 
     int evaluate() { return expr1->evaluate() >= expr2->evaluate(); }
     int getKind() { return GTE_EXPR; }
+    void genCode(codeData &);
 };
 
 class NEExpr: public BinaryExpr {
@@ -96,6 +107,7 @@ public:
 
     int evaluate() { return expr1->evaluate() != expr2->evaluate(); }
     int getKind() { return NE_EXPR; }
+    void genCode(codeData &);
 };
 
 class EQExpr: public BinaryExpr {
@@ -104,6 +116,7 @@ public:
 
     int evaluate() { return expr1->evaluate() == expr2->evaluate(); }
     int getKind() { return NE_EXPR; }
+    void genCode(codeData &);
 };
 
 class AddExpr: public BinaryExpr {
@@ -112,6 +125,7 @@ public:
 
     int evaluate() { return expr1->evaluate() + expr2->evaluate(); }
     int getKind() { return ADD_EXPR; }
+    void genCode(codeData &);
 };
 
 class SubExpr: public BinaryExpr {
@@ -120,6 +134,7 @@ public:
 
     int evaluate() { return expr1->evaluate() - expr2->evaluate(); }
     int getKind() { return SUB_EXPR; }
+    void genCode(codeData &);
 };
 
 class MultExpr: public BinaryExpr {
@@ -128,6 +143,7 @@ public:
 
     int evaluate() { return expr1->evaluate() * expr2->evaluate(); }
     int getKind() { return MULT_EXPR; }
+    void genCode(codeData &);
 };
 
 class DivExpr: public BinaryExpr {
@@ -136,6 +152,7 @@ public:
 
     int evaluate() { return expr1->evaluate() / expr2->evaluate(); }
     int getKind() { return DIV_EXPR; }
+    void genCode(codeData &);
 };
 
 class ModExpr: public BinaryExpr {
@@ -144,6 +161,7 @@ public:
 
     int evaluate() { return expr1->evaluate() % expr2->evaluate(); }
     int getKind() { return EXPT_EXPR; }
+    void genCode(codeData &);
 };
 
 class ExponentExpr: public BinaryExpr {
@@ -152,6 +170,7 @@ public:
 
     int evaluate() { return expt(expr1->evaluate(), expr2->evaluate()); }
     int getKind() { return MOD_EXPR; }
+    void genCode(codeData &);
 };
 
 class NumExpr: public Expr {
@@ -159,6 +178,7 @@ public:
     NumExpr(int value) { this->value = value; }
     int evaluate() { return value; }
     int getKind() { return NUM_EXPR; }
+    void genCode(codeData &);
 
     int value;
 };
@@ -168,6 +188,7 @@ public:
     IdExpr(string id) { this->id = id; }
     int evaluate() { return vars[id]; }
     int getKind() { return ID_EXPR; }
+    void genCode(codeData &);
 
     string id;
 };
@@ -177,6 +198,7 @@ public:
     StringExpr(string str) { this->str = str; }
     int evaluate() { return 0; }
     int getKind() { return STRING_EXPR; }
+    void genCode(codeData &);
 
     string str;
 };
@@ -186,6 +208,7 @@ public:
     InputExpr(string prompt) { this->prompt = prompt; }
     int evaluate();
     int getKind() { return INPUT_EXPR; }
+    void genCode(codeData &);
 
     string prompt;
 };
@@ -202,6 +225,7 @@ public:
     }
     int evaluate();
     int getKind() { return CALL_EXPR; }
+    void genCode(codeData &);
 
     BuiltInFunct fnId;
     Expr *arg0, *arg1;
@@ -220,6 +244,7 @@ enum StatementKind {
 
 class Statement {
 public:
+    virtual void genCode(string &) = 0;
     virtual void execute() = 0;
     virtual StatementKind getKind() = 0;
 };
@@ -228,6 +253,7 @@ class BlockStatement: public Statement {
 public:
     BlockStatement() {}
     void execute();
+    void genCode(string &);
     StatementKind getKind() { return BLOCK_STATEMENT; }
 	void add(Statement *st) { stList.push_back(st); }
 
@@ -242,6 +268,7 @@ public:
         this->expr = expr;
     }
     void execute();
+    void genCode(string &);
     StatementKind getKind() { return ASSIGN_STATEMENT; }
 
     string id;
@@ -254,6 +281,7 @@ public:
         this->lexpr = lexpr;
     }
     void execute();
+    void genCode(string &);
     StatementKind getKind() { return PRINT_STATEMENT; }
 
     ExprList lexpr;
@@ -267,6 +295,7 @@ public:
         this->falseBlock = falseBlock;
     }
     void execute();
+    void genCode(string &);
     StatementKind getKind() { return IF_STATEMENT; }
 
     Expr *cond;
@@ -279,6 +308,7 @@ public:
     PassStatement() {
     }
     void execute() {} ;
+    void genCode(string &);
     StatementKind getKind() { return PASS_STATEMENT; }
 };
 
@@ -289,6 +319,7 @@ public:
         this->block = block;
     }
     void execute();
+    void genCode(string &);
     StatementKind getKind() { return WHILE_STATEMENT; }
 
     Expr *cond;
@@ -304,6 +335,7 @@ public:
         this->block = block;
     }
     void execute();
+    void genCode(string &);
     StatementKind getKind() { return FOR_STATEMENT; }
 
     string id;
@@ -323,6 +355,7 @@ public:
         this->arg1 = arg1;
     }
     void execute();
+    void genCode(string &);
     StatementKind getKind() { return CALL_STATEMENT; }
 
     BuiltInFunct fnId;

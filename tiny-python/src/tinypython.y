@@ -68,7 +68,7 @@ statement: print_statement
 		  | call_statement
 ;
 
-print_statement: KW_PRINT '(' arg_list ')' { $$ = new PrintStatement(*$3); delete $3; }
+print_statement: KW_PRINT '(' arg_list ')' { $$ = new PrintStatement(*$3); delete $3; string c; $$->genCode(c);}
 ;
 
 arg_list: arg_list ',' argument {
@@ -87,6 +87,7 @@ argument: expr { $$ = $1; }
 
 	    free($1);
         $$ = new StringExpr(str);
+        //codeData c; $$->genCode(c);
 	}
 ;
 
