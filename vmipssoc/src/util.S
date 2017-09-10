@@ -87,8 +87,7 @@ exponent:
 	li $s3, 1		#r
 
 .while_exp:
-	sne $t0, $s1, $zero
-	beqz $t0, .while_end_expr
+	beqz $s1, .while_end_expr
 
 .if_exp:
 	move $a0, $s1
@@ -97,25 +96,22 @@ exponent:
 	addi $a3, $sp, 20
 	jal divide
 	lw $t0, 0($a3)
-
+	li $t1, 1
+	seq $t0, $t0, $t1
 	beqz $t0, .if_exp_end
 	move $a0, $s3
 	move $a1, $s0
-	addi $a2, $sp, 16
-	addi $a3, $sp, 20
 
 	jal mult
-	lw $s3, ($a2)
+	move $s3, $v0
 	addi $s1, $s1, -1
 
 .if_exp_end:
 	move $a0, $s0
 	move $a1, $s0
-	addi $a2, $sp, 16
-	addi $a3, $sp, 20
 
 	jal mult
-	lw $s0, 0($a2)
+	move $s0, $v0
 
 	move $a0, $s1
 	li $a1, 2
