@@ -182,7 +182,7 @@ void CallStatement::execute()
     releaseTemp(le.place);  \
     releaseTemp(re.place);  \
     data.place = nextTemp();    \
-    data.code += #func " " + data.place + ", " + le.place + ", " + re.place;   \
+    data.code += "\t" #func " " + data.place + ", " + le.place + ", " + re.place;   \
 }
 #define genDivCode(name,reg) void name##Expr::genCode(codeData &data) \
 {  \
@@ -193,14 +193,14 @@ void CallStatement::execute()
     releaseTemp(le.place);  \
     releaseTemp(re.place);  \
     data.place = nextTemp();    \
-    data.code += "move $a0, " + le.place + "\n";    \
-    data.code += "move $a1, " + re.place + "\n";    \
-    data.code += "addi $sp, -8\n";  \
-    data.code += "move $a2, $sp\n"; \
-    data.code += "addi $a3, $sp, 4\n";  \
-    data.code += "jal divide\n" ;   \
-    data.code += "lw " + data.place + ", ($" #reg ")\n";  \
-    data.code += "addi $sp, $sp, 8";    \
+    data.code += "\tmove $a0, " + le.place + "\n";    \
+    data.code += "\tmove $a1, " + re.place + "\n";    \
+    data.code += "\taddi $sp, -8\n";  \
+    data.code += "\tmove $a2, $sp\n"; \
+    data.code += "\taddi $a3, $sp, 4\n";  \
+    data.code += "\tjal divide\n" ;   \
+    data.code += "\tlw " + data.place + ", ($" #reg ")\n";  \
+    data.code += "\taddi $sp, $sp, 8";    \
 }   
 #define genRelCode(name,func) void name##Expr::genCode(codeData &data)  \
 {   \
@@ -211,25 +211,25 @@ void CallStatement::execute()
     releaseTemp(le.place);  \
     releaseTemp(re.place);  \
     data.place = nextTemp();    \
-    data.code += #func " " + data.place + ", " + le.place + ", " + re.place;   \
+    data.code += "\t" #func " " + data.place + ", " + le.place + ", " + re.place;   \
 }
 
 void NumExpr::genCode(codeData &data)
 {
     data.place = nextTemp();
-    data.code = "li " + data.place + ", " + to_string(value);
+    data.code = "\tli " + data.place + ", " + to_string(value);
 }
 
 void StringExpr::genCode(codeData &data)
 {
     data.place = nextTemp();
-    data.code = "la " + data.place + ", "+nextLstringFor(str);
+    data.code = "\tla " + data.place + ", "+nextLstringFor(str);
 }
 
 void IdExpr::genCode(codeData &data)
 {
     data.place = nextTemp();
-    data.code = "lw " + data.place + ", " + id;
+    data.code = "\tlw " + data.place + ", " + id;
 }
 
 genAdditiveCode(Add,add);
@@ -245,10 +245,10 @@ void MultExpr::genCode(codeData &data)
     releaseTemp(re.place); 
     data.place = nextTemp();
 
-    data.code += "move $a0, " + le.place + "\n";
-    data.code += "move $a1, " + re.place + "\n";
-    data.code += "jal mult\n" ; 
-    data.code += "move " + data.place + ", $v0";
+    data.code += "\tmove $a0, " + le.place + "\n";
+    data.code += "\tmove $a1, " + re.place + "\n";
+    data.code += "\tjal mult\n" ; 
+    data.code += "\tmove " + data.place + ", $v0";
 }
 
 genDivCode(Div,a2);
@@ -264,10 +264,10 @@ void ExponentExpr::genCode(codeData &data)
     releaseTemp(re.place); 
     data.place = nextTemp();
 
-    data.code += "move $a0, " + le.place + "\n";
-    data.code += "move $a1, " + re.place + "\n";
-    data.code += "jal exponent\n"; 
-    data.code += "move " + data.place + ", $v0";
+    data.code += "\tmove $a0, " + le.place + "\n";
+    data.code += "\tmove $a1, " + re.place + "\n";
+    data.code += "\tjal exponent\n"; 
+    data.code += "\tmove " + data.place + ", $v0";
 }
 
 genRelCode(LT,slt);
@@ -281,10 +281,10 @@ genRelCode(EQ,seq);
 void InputExpr::genCode(codeData &data)
 {
     data.place = "$v0";
-    data.code = "la $a0, "+nextLstringFor(prompt)+"\n";
-    data.code += "jal puts\n";
-    data.code += ".get_key_loop:\n\tjal keypad_getkey\n\tbeqz $v0, .get_key_loop";
-    data.code += "\n\nli $a0, '\\n' \njal put_char";
+    data.code = "\tla $a0, "+nextLstringFor(prompt)+"\n";
+    data.code += "\tjal puts\n";
+    data.code += "\t.get_key_loop:\n\tjal keypad_getkey\n\tbeqz $v0, .get_key_loop";
+    data.code += "\n\n\tli $a0, '\\n' \n\tjal put_char";
 }
 
 // gen(Call);
@@ -293,8 +293,7 @@ void CallExpr::genCode(codeData &data)
     switch (fnId) {
         case FN_TIMECLOCK: {
             data.place = "$v0";
-            data.code = "lw $v0, MS_COUNTER_REG_ADDR\n";
-            //data.code += "jal rand_seed";
+            data.code = "\tlw $v0, MS_COUNTER_REG_ADDR\n";
             return;
         }
         case FN_RANDINT: {
@@ -306,21 +305,21 @@ void CallExpr::genCode(codeData &data)
             releaseTemp(ra.place);
             data.place = nextTemp();
 
-            data.code += "sub " + data.place + ", " + ra.place + ", "+la.place+"\n";
-            data.code += "addi " + data.place + ", 1\n";
-            data.code += "move $a0, "+data.place+"\n";
-            data.code += "jal rand\n";
+            data.code += "\tsub " + data.place + ", " + ra.place + ", "+la.place+"\n";
+            data.code += "\taddi " + data.place + ", 1\n";
+            data.code += "\tmove $a0, "+data.place+"\n";
+            data.code += "\tjal rand\n";
 
-            data.code += "move $a0, $v0\n";  
-            data.code += "move $a1, " + data.place + "\n";   
-            data.code += "addi $sp, -8\n"; 
-            data.code += "move $a2, $sp\n";
-            data.code += "addi $a3, $sp, 4\n"; 
-            data.code += "jal divide\n" ;  
-            data.code += "lw " + data.place + ", ($a3)\n"; 
-            data.code += "addi $sp, $sp, 8\n";
+            data.code += "\tmove $a0, $v0\n";  
+            data.code += "\tmove $a1, " + data.place + "\n";   
+            data.code += "\taddi $sp, -8\n"; 
+            data.code += "\tmove $a2, $sp\n";
+            data.code += "\taddi $a3, $sp, 4\n"; 
+            data.code += "\tjal divide\n" ;  
+            data.code += "\tlw " + data.place + ", ($a3)\n"; 
+            data.code += "\taddi $sp, $sp, 8\n";
 
-            data.code += "add $v0, "+data.place+", "+la.place;
+            data.code += "\tadd $v0, "+data.place+", "+la.place;
             releaseTemp(data.place);
             data.place = "$v0";
         }
@@ -340,15 +339,15 @@ void PrintStatement::genCode(string &code)
         expr->genCode(cd);
         code += "\n"+cd.code;
         releaseTemp(cd.place);
-        code += "\nmove $a0, " + cd.place;
+        code += "\n\tmove $a0, " + cd.place;
         
         if (expr->isA(STRING_EXPR))
-            code += "\njal puts";
+            code += "\n\tjal puts";
         else
-            code += "\njal put_udecimal";
+            code += "\n\tjal put_udecimal";
         it++;
     }
-    code += "\n\nli $a0, '\\n' \njal put_char";
+    code += "\n\n\tli $a0, '\\n' \n\tjal put_char";
 
     // printf("code:\n%s\n", code.c_str());
 }
@@ -362,8 +361,8 @@ void CallStatement::genCode(string &code)
             codeData cd;
             arg0->genCode(cd);
             code += cd.code + "\n";
-            code += "move $a0, "+cd.place+"\n";
-            code += "jal rand_seed";
+            code += "\tmove $a0, "+cd.place+"\n";
+            code += "\tjal rand_seed";
             releaseTemp(cd.place);
         }
         default: {
@@ -383,7 +382,7 @@ void AssignStatement::genCode(string &code)
     code = "# AssignStatement\n";
     code += cd.code+"\n";
     releaseTemp(cd.place);
-    code += "sw " + cd.place + ", " + id;
+    code += "\tsw " + cd.place + ", " + id;
 }
 
 // genS(Block);
@@ -402,7 +401,12 @@ void BlockStatement::genCode(string &code)
     }
 }
 
-genS(If);
+// genS(If);
+void IfStatement::genCode(string &code)
+{
+
+}
+
 genS(While);
 genS(For);
 genS(Pass);
