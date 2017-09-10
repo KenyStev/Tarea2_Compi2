@@ -293,7 +293,9 @@ void CallExpr::genCode(codeData &data)
     switch (fnId) {
         case FN_TIMECLOCK: {
             data.place = "$v0";
-            data.code = "lw $v0, MS_COUNTER_REG_ADDR";
+            data.code = "lw $v0, MS_COUNTER_REG_ADDR\n";
+            //data.code += "jal rand_seed";
+            return;
         }
         case FN_RANDINT: {
             codeData la, ra;
@@ -359,8 +361,9 @@ void CallStatement::genCode(string &code)
         case FN_RANDSEED: {
             codeData cd;
             arg0->genCode(cd);
+            code += cd.code + "\n";
             code += "move $a0, "+cd.place+"\n";
-            code += "j rand";
+            code += "jal rand_seed";
             releaseTemp(cd.place);
         }
         default: {
@@ -400,6 +403,6 @@ void BlockStatement::genCode(string &code)
 }
 
 genS(If);
-genS(Pass);
 genS(While);
 genS(For);
+genS(Pass);
