@@ -6,7 +6,7 @@
 
 using namespace std;
 
-int lstringCount=0;//,varCount=0;
+int lstringCount=0, labelsCount=0;
 
 string temps[] = {"$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7","$t8","$t9"};
 map<string, int> tempRegs;
@@ -39,6 +39,11 @@ string nextLstringFor(string str)
         lstrings[str] = "lstring" + to_string(lstringCount++);
     }
     return lstrings[str];
+}
+
+string nextInternalLaber(string str)
+{
+    return string(".l") + str + to_string(labelsCount++);
 }
 
 int expt(int p, unsigned int q)
@@ -404,7 +409,24 @@ void BlockStatement::genCode(string &code)
 // genS(If);
 void IfStatement::genCode(string &code)
 {
+    codeData cd;
+    cond->genCode(cd);
 
+    string tr, fl;
+    trueBlock->genCode(tr);
+    falseBlock->genCode(fl);
+
+    string lelse = nextInternalLaber("else");
+    string lendif = nextInternalLaber("end_if");
+
+    code = "# IfStatement\n";
+    code += cd.code + "\n";
+    code += "\tbeqz " + cd.place + ", " + lelse;
+    releaseTemp(cd.place);
+
+    code += tr + "\n" + "\nj " + lendif + "\n";
+    code += lelse + ":\n";
+    code += fl + "\n" + lendif + ": \n";
 }
 
 genS(While);
