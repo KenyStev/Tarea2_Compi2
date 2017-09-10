@@ -26,7 +26,10 @@ int main(int argc, char *argv[])
     input = NULL;
     yyparse();
 
+    string s;
     if (input != 0) {
-        input->execute();
+    	input->genCode(s);
+        // input->execute();
     }
+    printf("%s\n", s.c_str());
 }

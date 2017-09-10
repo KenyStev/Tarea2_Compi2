@@ -5,6 +5,9 @@
 .data
 
 msg: .asciz "Hello World\n"
+lstring0: .asciz "Press a key : "
+lstring1: .asciz "The key you pressed is : "
+num: .word 0
 
 .text
 
@@ -13,7 +16,7 @@ main:
     li $a1, BLACK
     jal set_color
     jal clear_screen
-    
+
 .get_key_loop:
     jal keypad_getkey
     beqz $v0, .get_key_loop
