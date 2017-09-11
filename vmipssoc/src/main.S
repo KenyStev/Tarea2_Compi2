@@ -3,14 +3,11 @@
 .global main
 
 .data
-	count: .word 0
-	number: .word 0
-	total: .word 0
+	i: .word 0
 
 
-	lstring1: .asciz " = "
-	lstring0: .asciz "Number "
-	lstring2: .asciz "The total is "
+	lstring1: .asciz "End of loop"
+	lstring0: .asciz "i = "
 .text
 
 main:
@@ -20,88 +17,40 @@ main:
 	jal clear_screen
 
 
-# CallStatement
-	lw $v0, MS_COUNTER_REG_ADDR
-
-	move $a0, $v0
-	jal rand_seed
-
-# AssignStatement
+# ForStatement
 	li $t0, 0
-	sw $t0, total
-
-# AssignStatement
-	li $t0, 0
-	sw $t0, count
-
-# WhileStatement
-.lwhile0: 
-	lw $t0, count
-	li $t1, 3
-	slt $t0, $t0, $t1
-	beqz $t0, .lend_while1
-
-# AssignStatement
-	li $t1, 0
-	li $t2, 100
-	sub $t1, $t2, $t1
-	addi $t1, 1
-	move $a0, $t1
-	jal rand
-	move $a0, $v0
-	move $a1, $t1
-	addi $sp, -8
-	move $a2, $sp
-	addi $a3, $sp, 4
-	jal divide
-	lw $t1, ($a3)
-	addi $sp, $sp, 8
-	add $v0, $t1, $t1
-	sw $v0, number
+	sw $t0, i
+	li $t1, 10
+	addi $sp, $sp, -4
+	sw $t1, ($sp)
+.lfor0: 
+	lw $t1, ($sp)
+	sle $t2, $t0, $t1
+	beqz $t2, .lend_for1
 
 # PrintStatement
-	la $t1, lstring0
-	move $a0, $t1
+	la $t2, lstring0
+	move $a0, $t2
 	jal puts
-	lw $t1, count
-	move $a0, $t1
-	jal put_udecimal
-	la $t1, lstring1
-	move $a0, $t1
-	jal puts
-	lw $t1, number
-	move $a0, $t1
+	lw $t2, i
+	move $a0, $t2
 	jal put_udecimal
 
 
 	li $a0, '\n' 
 	jal put_char
 
-# AssignStatement
-	lw $t1, count
-	li $t2, 1
-	add $t1, $t1, $t2
-	sw $t1, count
-
-# AssignStatement
-	lw $t1, total
-	lw $t2, number
-	add $t1, $t1, $t2
-	sw $t1, total
-
-
-
-	j .lwhile0
-.lend_while1: 
+	lw $t0, i
+	addi $t0, $t0, 1
+	sw $t0, i
+	j .lfor0
+.lend_for1: 
 
 
 # PrintStatement
-	la $t0, lstring2
+	la $t0, lstring1
 	move $a0, $t0
 	jal puts
-	lw $t0, total
-	move $a0, $t0
-	jal put_udecimal
 
 
 	li $a0, '\n' 
