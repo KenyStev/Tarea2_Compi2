@@ -470,8 +470,6 @@ void ForStatement::genCode(string &code)
     code += fe.code + "\n";
     
     code += "\taddi $sp, $sp, -4\n";
-    // string temp = nextTemp();
-    // code += "\taddi " + temp + ", $sp, " + 
     code += "\tsw " + fe.place + ", ($sp)\n";
     code += lfor + ": \n";
     code += "\tlw " + fe.place + ", ($sp)\n";
@@ -483,6 +481,7 @@ void ForStatement::genCode(string &code)
     code += "\tsw " + se.place + ", " + id+"\n";
     code += "\tj " + lfor + "\n";
     code += lendfor + ": \n";
+    code += "\taddi $sp, $sp, 4";
     releaseTemp(se.place);
     releaseTemp(fe.place);
     releaseTemp(branch);

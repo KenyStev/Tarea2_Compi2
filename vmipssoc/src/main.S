@@ -45,7 +45,7 @@ main:
 	sw $t0, i
 	j .lfor0
 .lend_for1: 
-
+	addi $sp, $sp, 4
 
 # PrintStatement
 	la $t0, lstring1
