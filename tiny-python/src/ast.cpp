@@ -452,7 +452,20 @@ void WhileStatement::genCode(string &code)
 // genS(For);
 void ForStatement::genCode(string &code)
 {
+    codeData se,fe;
+    startExpr->genCode(se);
+    endExpr->genCode(fe);
 
+    string block_code;
+    block->genCode(block_code);
+
+    string lfor = nextInternalLaber("for");
+    string lendfor = nextInternalLaber("end_for");
+    // string counterReg = nextTemp();
+
+    code = "# ForStatement\n";
+    code += se.code + "\n" + fe.code + "\n";
+    code += lfor + ": \n" + "";
 }
 
 genS(Pass);
