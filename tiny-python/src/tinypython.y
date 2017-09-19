@@ -131,7 +131,7 @@ expr: expr OP_LT expra  { $$ = new LTExpr($1, $3); }
     | expr OP_LTE expra { $$ = new LTEExpr($1, $3); }
     | expr OP_GTE expra { $$ = new GTEExpr($1, $3); }
     | expr OP_NE expra  { $$ = new NEExpr($1, $3); }
-    | expr OP_EQ expra    { $$ = new EQExpr($1, $3); }
+    | expr OP_EQ expra  { $$ = new EQExpr($1, $3); }
     | expra             { $$ = $1; }
 ;
 

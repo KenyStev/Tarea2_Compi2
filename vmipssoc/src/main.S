@@ -3,11 +3,11 @@
 .global main
 
 .data
-	i: .word 0
+	num: .word 0
 
 
-	lstring1: .asciz "End of loop"
-	lstring0: .asciz "i = "
+	lstring0: .asciz "Press a key : "
+	lstring1: .asciz "Your input was: "
 .text
 
 main:
@@ -17,40 +17,25 @@ main:
 	jal clear_screen
 
 
-# ForStatement
-	li $t0, 0
-	sw $t0, i
-	li $t1, 10
-	addi $sp, $sp, -4
-	sw $t1, ($sp)
-.lfor0: 
-	lw $t1, ($sp)
-	sle $t2, $t0, $t1
-	beqz $t2, .lend_for1
-
-# PrintStatement
-	la $t2, lstring0
-	move $a0, $t2
+# AssignStatement
+	la $a0, lstring0
 	jal puts
-	lw $t2, i
-	move $a0, $t2
-	jal put_udecimal
 
+.get_key_loop:
+	jal keypad_getkey
+	beqz $v0, .get_key_loop
 
 	li $a0, '\n' 
 	jal put_char
-
-	lw $t0, i
-	addi $t0, $t0, 1
-	sw $t0, i
-	j .lfor0
-.lend_for1: 
-	addi $sp, $sp, 4
+	sw $v0, num
 
 # PrintStatement
 	la $t0, lstring1
 	move $a0, $t0
 	jal puts
+	lw $t0, num
+	move $a0, $t0
+	jal put_udecimal
 
 
 	li $a0, '\n' 

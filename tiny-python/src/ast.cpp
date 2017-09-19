@@ -287,8 +287,8 @@ void InputExpr::genCode(codeData &data)
 {
     data.place = "$v0";
     data.code = "\tla $a0, "+nextLstringFor(prompt)+"\n";
-    data.code += "\tjal puts\n";
-    data.code += "\t.get_key_loop:\n\tjal keypad_getkey\n\tbeqz $v0, .get_key_loop";
+    data.code += "\tjal puts\n\n";
+    data.code += ".get_key_loop:\n\tjal keypad_getkey\n\tbeqz $v0, .get_key_loop";
     data.code += "\n\n\tli $a0, '\\n' \n\tjal put_char";
 }
 
@@ -306,25 +306,38 @@ void CallExpr::genCode(codeData &data)
             arg0->genCode(la);
             arg1->genCode(ra);
             data.code = la.code + "\n" + ra.code + "\n";
+            data.place = nextTemp();
             releaseTemp(la.place);
             releaseTemp(ra.place);
-            data.place = nextTemp();
 
-            data.code += "\tsub " + data.place + ", " + ra.place + ", "+la.place+"\n";
-            data.code += "\taddi " + data.place + ", 1\n";
-            data.code += "\tmove $a0, "+data.place+"\n";
+            data.code += "\taddi $sp, $sp, -8\n";
+            data.code += "\tsw " + la.place + ", ($sp)\n";
+            data.code += "\tsw " + ra.place + ", 4($sp)\n";
+
+            // data.code += "\tsub " + data.place + ", " + ra.place + ", "+la.place+"\n";
+            // data.code += "\taddi " + data.place + ", 1\n";
+            // data.code += "\tmove $a0, "+data.place+"\n";
             data.code += "\tjal rand\n";
 
-            data.code += "\tmove $a0, $v0\n";  
-            data.code += "\tmove $a1, " + data.place + "\n";   
+            data.code += "\tlw " + la.place + ", ($sp)\n";
+            data.code += "\tlw " + ra.place + ", 4($sp)\n";
+
+            data.code += "\tmove $a0, $v0\n";
+            data.code += "\tmove $a1, " + ra.place + "\n";
             data.code += "\taddi $sp, -8\n"; 
             data.code += "\tmove $a2, $sp\n";
             data.code += "\taddi $a3, $sp, 4\n"; 
-            data.code += "\tjal divide\n" ;  
+            data.code += "\tjal divide\n";
             data.code += "\tlw " + data.place + ", ($a3)\n"; 
+            data.code += "\taddi $sp, $sp, 8\n";
+            
+            data.code += "\tlw " + la.place + ", ($sp)\n";
+            data.code += "\tlw " + ra.place + ", 4($sp)\n";
+
             data.code += "\taddi $sp, $sp, 8\n";
 
             data.code += "\tadd $v0, "+data.place+", "+la.place;
+            
             releaseTemp(data.place);
             data.place = "$v0";
         }
